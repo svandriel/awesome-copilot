@@ -1,6 +1,7 @@
 # Work Items, Area Paths & Iterations
 
 ## Table of Contents
+
 - [Work Items (Boards)](#work-items-boards)
 - [Area Paths](#area-paths)
 - [Iterations](#iterations)
@@ -41,8 +42,8 @@ az boards work-item create \
 az boards work-item create \
   --title "New feature" \
   --type "User Story" \
-  --area "Project\\Area1" \
-  --iteration "Project\\Sprint 1"
+  --area 'Project\Area1' \
+  --iteration 'Project\Sprint 1'
 
 # With custom fields
 az boards work-item create \
@@ -55,10 +56,6 @@ az boards work-item create \
   --title "Issue" \
   --type Bug \
   --discussion "Initial investigation completed"
-
-# For a long --discussion body on Windows, see references/long-comments-on-windows.md.
-# Short version: use azps.ps1 in PowerShell, or fall back to 'az devops invoke'
-# with --in-file when no native --file-path flag is available.
 
 # Open in browser after creation
 az boards work-item create --title "Bug" --type Bug --open
@@ -77,25 +74,17 @@ az boards work-item update \
 # Move to different area
 az boards work-item update \
   --id {work-item-id} \
-  --area "{ProjectName}\\{Team}\\{Area}"
+  --area '{ProjectName}\{Team}\{Area}'
 
 # Change iteration
 az boards work-item update \
   --id {work-item-id} \
-  --iteration "{ProjectName}\\Sprint 5"
+  --iteration '{ProjectName}\Sprint 5'
 
 # Add comment/discussion
 az boards work-item update \
   --id {work-item-id} \
   --discussion "Work in progress"
-
-# Long comment on Windows: read the body into a PowerShell variable and call
-# azps.ps1 instead of az.cmd, or fall back to 'az devops invoke' with --in-file.
-# Full guidance in references/long-comments-on-windows.md.
-#
-# PowerShell example:
-#   $body = Get-Content -Raw .\comment.md
-#   azps.ps1 boards work-item update --id 1234 --discussion $body
 
 # Update with custom fields
 az boards work-item update \
@@ -116,8 +105,8 @@ az boards work-item delete --id {work-item-id} --destroy --yes
 ### Work Item Relations
 
 ```bash
-# List relations
-az boards work-item relation list --id {work-item-id}
+# Show relations
+az boards work-item relation show --id {work-item-id}
 
 # List supported relation types
 az boards work-item relation list-type
@@ -126,7 +115,7 @@ az boards work-item relation list-type
 az boards work-item relation add --id {work-item-id} --relation-type parent --target-id {parent-id}
 
 # Remove relation
-az boards work-item relation remove --id {work-item-id} --relation-id {relation-id}
+az boards work-item relation remove --id {work-item-id} --relation-type parent --target-id {parent-id} --yes
 ```
 
 ## Area Paths
@@ -135,28 +124,28 @@ az boards work-item relation remove --id {work-item-id} --relation-id {relation-
 
 ```bash
 az boards area project list --project {project}
-az boards area project show --path "Project\\Area1" --project {project}
+az boards area project show --id {area-id} --project {project}
 ```
 
 ### Create Area
 
 ```bash
-az boards area project create --path "Project\\NewArea" --project {project}
+az boards area project create --name "NewArea" --path 'Project\Area1' --project {project}
 ```
 
 ### Update Area
 
 ```bash
 az boards area project update \
-  --path "Project\\OldArea" \
-  --new-path "Project\\UpdatedArea" \
+  --path 'Project\OldArea' \
+  --name "UpdatedArea" \
   --project {project}
 ```
 
 ### Delete Area
 
 ```bash
-az boards area project delete --path "Project\\AreaToDelete" --project {project} --yes
+az boards area project delete --path 'Project\AreaToDelete' --project {project} --yes
 ```
 
 ### Area Team Management
@@ -168,19 +157,19 @@ az boards area team list --team {team-name} --project {project}
 # Add area to team
 az boards area team add \
   --team {team-name} \
-  --path "Project\\NewArea" \
+  --path 'Project\NewArea' \
   --project {project}
 
 # Remove area from team
 az boards area team remove \
   --team {team-name} \
-  --path "Project\\AreaToRemove" \
+  --path 'Project\AreaToRemove' \
   --project {project}
 
 # Update team area
 az boards area team update \
   --team {team-name} \
-  --path "Project\\Area" \
+  --path 'Project\Area' \
   --project {project} \
   --include-sub-areas true
 ```
@@ -191,52 +180,61 @@ az boards area team update \
 
 ```bash
 az boards iteration project list --project {project}
-az boards iteration project show --path "Project\\Sprint 1" --project {project}
+# Use the iteration id from the list output
+az boards iteration project show --id {iteration-id} --project {project}
 ```
 
 ### Create Iteration
 
 ```bash
-az boards iteration project create --path "Project\\Sprint 1" --project {project}
+az boards iteration project create --name "Sprint 1" --path 'Project\Iteration' --project {project}
 ```
 
 ### Update Iteration
 
 ```bash
 az boards iteration project update \
-  --path "Project\\OldSprint" \
-  --new-path "Project\\NewSprint" \
+  --path 'Project\OldSprint' \
+  --name "NewSprint" \
   --project {project}
 ```
 
 ### Delete Iteration
 
 ```bash
-az boards iteration project delete --path "Project\\OldSprint" --project {project} --yes
+az boards iteration project delete --path 'Project\OldSprint' --project {project} --yes
 ```
 
 ### Team Iterations
 
 ```bash
 # List iterations for team
-az boards iteration team list --team {team-name} --project {project}
+az boards iteration team list \
+  --team {team-name} \
+  --project {project}
+
+# List current iterations for team
+az boards iteration team list \
+  --team {team-name} \
+  --project {project} \
+  --timeframe current
 
 # Add iteration to team
 az boards iteration team add \
   --team {team-name} \
-  --path "Project\\Sprint 1" \
+  --id {iteration-id-guid} \
   --project {project}
 
 # Remove iteration from team
 az boards iteration team remove \
   --team {team-name} \
-  --path "Project\\Sprint 1" \
+  --id {iteration-id-guid} \
   --project {project}
 
 # List work items in iteration
 az boards iteration team list-work-items \
   --team {team-name} \
-  --path "Project\\Sprint 1" \
+  --id {iteration-id-guid} \
   --project {project}
 ```
 
@@ -246,7 +244,7 @@ az boards iteration team list-work-items \
 # Set default iteration for team
 az boards iteration team set-default-iteration \
   --team {team-name} \
-  --path "Project\\Sprint 1" \
+  --default-iteration-macro @CurrentIteration \
   --project {project}
 
 # Show default iteration
@@ -257,7 +255,7 @@ az boards iteration team show-default-iteration \
 # Set backlog iteration for team
 az boards iteration team set-backlog-iteration \
   --team {team-name} \
-  --path "Project\\Sprint 1" \
+  --id {iteration-id-guid} \
   --project {project}
 
 # Show backlog iteration
@@ -266,5 +264,5 @@ az boards iteration team show-backlog-iteration \
   --project {project}
 
 # Show current iteration
-az boards iteration team show --team {team-name} --project {project} --timeframe current
+az boards iteration team list --team {team-name} --project {project} --timeframe current
 ```
